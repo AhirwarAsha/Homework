@@ -1,0 +1,7 @@
+scrape_configs:
+  - job_name: 'writer'
+    static_configs:
+      - targets: ['writer:5000']
+  - job_name: 'reader'
+    static_configs:
+      - targets: ['reader-service:80']
