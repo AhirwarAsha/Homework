@@ -69,4 +69,9 @@ pipeline {
         }
     }
     
-}
+/* Explanation
+-Build & Push Docker Images: The pipeline builds and pushes Writer & Reader images to DockerHub.
+-Deploy to Kubernetes: Deploys MySQL, Writer, Reader, Prometheus, and Grafana using kubectl apply.
+-Verify Deployment: Ensures all pods and services are running.
+-API Test: Calls the Reader API (/metrics) to validate response time monitoring.*/
+
