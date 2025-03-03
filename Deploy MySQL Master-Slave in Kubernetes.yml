@@ -1,3 +1,7 @@
+#Deploy mysql-master and mysql-slave pods with automatic replication setup.
+#Use Kubernetes ConfigMaps and Secrets for credentials.
+#Ensure replication is configured on first launch.
+
 apiVersion: v1
 kind: Secret
 metadata:
