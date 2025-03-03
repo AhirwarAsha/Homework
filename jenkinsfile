@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        REGISTRY = 'your-dockerhub-username'
+        IMAGE_WRITER = 'writer-app'
+        IMAGE_READER = 'reader-app'
+        KUBECONFIG = credentials('kubeconfig')  // Kubernetes kubeconfig stored in Jenkins credentials
+    }
+
+    stages {
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/your-repo/devops-k8s-mysql.git'
+            }
+        }
+
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    sh "docker build -t $REGISTRY/$IMAGE_WRITER:latest writer/"
+                    sh "docker build -t $REGISTRY/$IMAGE_READER:latest reader/"
+                }
+            }
+        }
+
+        stage('Push Docker Images') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'docker-hub-credentials', url: '']) {
+                        sh "docker push $REGISTRY/$IMAGE_WRITER:latest"
+                        sh "docker push $REGISTRY/$IMAGE_READER:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    sh """
+                    kubectl apply -f k8s/mysql-secret.yaml
+                    kubectl apply -f k8s/mysql-master.yaml
+                    kubectl apply -f k8s/mysql-slave.yaml
+                    kubectl apply -f k8s/writer-deployment.yaml
+                    kubectl apply -f k8s/reader-deployment.yaml
+                    kubectl apply -f k8s/reader-service.yaml
+                    kubectl apply -f k8s/prometheus.yaml
+                    kubectl apply -f k8s/grafana.yaml
+                    """
+                }
+            }
+        }
+
+        stage('Verify Deployment') {
+            steps {
+                script {
+                    sh "kubectl get pods -n default"
+                    sh "kubectl get svc -n default"
+                }
+            }
+        }
+
+        stage('Run API Tests') {
+            steps {
+                script {
+                    sh "curl -s http://$(kubectl get svc reader-service -o jsonpath='{.status.loadBalancer.ingress[0].ip}')/metrics"
+                }
+            }
+        }
+}
