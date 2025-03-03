@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-slave
+spec:
+  template:
+    spec:
+      containers:
+      - name: mysql-slave
+        image: mysql:8
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: MYSQL_ROOT_PASSWORD
+        - name: MYSQL_REPLICATION_USER
+          value: "repl_user"
+        - name: MYSQL_REPLICATION_PASSWORD
+          value: "repl_pass"
