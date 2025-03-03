@@ -46,7 +46,6 @@ pipeline {
                     kubectl apply -f k8s/reader-deployment.yaml
                     kubectl apply -f k8s/reader-service.yaml
                     kubectl apply -f k8s/prometheus.yaml
-                    kubectl apply -f k8s/grafana.yaml
                     """
                 }
             }
